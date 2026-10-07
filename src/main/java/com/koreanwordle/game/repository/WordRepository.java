@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface WordRepository extends JpaRepository<Word, Long> {
@@ -22,7 +23,15 @@ public interface WordRepository extends JpaRepository<Word, Long> {
     @Query("""
       select count(w) > 0
       from Word w
-      where function('replace', w.word, '-', '') = :submittedWord
+      where length('replace', w.word, '-', '') = :submittedWord
   """)
     boolean findWordInList(String submittedWord);
+
+    @Query("""
+            select w
+            from Word w
+            where function('replace', w.word, '-', '') <= :length
+            order by rand() limit 1
+    """)
+    Optional<Word> getRandomWord(int length);
 }
