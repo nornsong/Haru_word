@@ -4,9 +4,20 @@ ENV GRADLE_OPTS="-Dorg.gradle.jvmargs=-Xmx384m -Dorg.gradle.workers.max=1 -Dorg.
 COPY . .
 RUN gradle clean bootWar --no-daemon --max-workers=1
 
+#FROM eclipse-temurin:21-jre
+#WORKDIR /app
+#COPY --from=build /app/build/libs/*.war app.war
+#EXPOSE 8080
+#ENV JAVA_OPTS="-Xms256m -Xmx1100m"
+#ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.war"]
 FROM eclipse-temurin:21-jre
+
 WORKDIR /app
-COPY --from=build /app/build/libs/*.war app.war
+
+COPY build/libs/*.war app.war
+
 EXPOSE 8080
+
 ENV JAVA_OPTS="-Xms256m -Xmx1100m"
+
 ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.war"]

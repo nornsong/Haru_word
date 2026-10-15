@@ -1,9 +1,12 @@
 package com.koreanwordle.game.service;
 
-import com.koreanwordle.game.dto.BusGameMakingResponse;
+import com.koreanwordle.game.dto.BusGameSggResponse;
+import com.koreanwordle.game.dto.BusGameBusStopIdResponse;
 import org.springframework.http.ResponseEntity;
 
 public interface BusGameService {
 
-    ResponseEntity<BusGameMakingResponse> getMakingBusGameRoom();
+    ResponseEntity<BusGameSggResponse> getBusGameSgg(String ctpvCd);
+
+    ResponseEntity<BusGameBusStopIdResponse> getBusGameBusStopRouteId(String ctpvCd, String sggCd);
 }
