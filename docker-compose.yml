@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    env_file:
+      - .env
     image: koreanwordle:latest
     container_name: haru_word
     restart: unless-stopped

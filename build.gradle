@@ -38,6 +38,14 @@ dependencies {
     // Bean Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // restClient
+    implementation 'org.springframework.boot:spring-boot-starter-restclient'
+    testImplementation 'org.springframework.boot:spring-boot-starter-restclient-test'
+
+    // Ulid
+    implementation 'com.github.f4b6a3:ulid-creator:5.2.4'
+
+
 
     /* FE */
 

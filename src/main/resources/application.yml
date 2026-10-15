@@ -25,3 +25,9 @@ spring:
     view:
       prefix: /WEB-INF/views/
       suffix: .jsp
+
+public-api:
+  base-url: ${PUBLIC_API_URL}
+  service-key: ${PUBLIC_API_SERVICE_KEY}
+  bus-stop-url: ${PUBLIC_API_URL_BUSSTOP}
+  bus-stop-service-key: ${PUBLIC_API_URL_BUSSTOP_KEY}
