@@ -10,4 +10,6 @@ public interface GameService {
     GameResponse getCreateRandomGame();
     
     GuessResponse submitAnswer(Long gameId, String submittedWord, Integer attemptNumber);
+
+
 }

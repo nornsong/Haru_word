@@ -1,8 +1,6 @@
 package com.koreanwordle.game.controller;
 
-import com.koreanwordle.game.dto.BusGameBusStopRequest;
-import com.koreanwordle.game.dto.BusGameSggResponse;
-import com.koreanwordle.game.dto.BusGameBusStopIdResponse;
+import com.koreanwordle.game.dto.busGame.*;
 import com.koreanwordle.game.service.BusGameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +17,23 @@ public class BusGameController {
     private final BusGameService busGameService;
 
     @GetMapping("/chooseCtpv")
+    public ResponseEntity<BusGameCtpvResponse> getBusGameCtpv () {
+        return busGameService.getBusGameCtpv();
+    }
+
+    @GetMapping("/chooseSgg")
     public ResponseEntity<BusGameSggResponse> getBusGameSgg (@RequestBody String ctpvCd) {
         return busGameService.getBusGameSgg(ctpvCd);
     }
 
-    @GetMapping("/choseSgg")
-    public ResponseEntity<BusGameBusStopIdResponse> getBusGameRouteId (@RequestBody BusGameBusStopRequest request) {
-        return busGameService.getBusGameBusStopRouteId(request.ctpvCd(), request.sggCd());
+    @GetMapping("/chooseRteList")
+    public ResponseEntity<BusGameRteListResponse> getBusGameRteList (@RequestBody BusGameRteListRequest request) {
+        return busGameService.getBusGameRteList(request.ctpvCd(), request.sggCd());
     }
+
+    @GetMapping("/chooseSttnList")
+    public ResponseEntity<BusGameSttnListResponse> getBusGameSttnList (@RequestBody BusGameSttnListRequest request) {
+        return busGameService.getBusGameSttnList(request.ctpvCd(), request.sggCd(), request.rteId());
+    }
+
 }

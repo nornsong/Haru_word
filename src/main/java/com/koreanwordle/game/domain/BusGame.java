@@ -2,9 +2,6 @@ package com.koreanwordle.game.domain;
 
 import jakarta.persistence.*;
 
-import java.time.Duration;
-import java.time.LocalDate;
-
 @Entity
 public class BusGame {
 
@@ -13,29 +10,25 @@ public class BusGame {
     private Long id;
 
     @Column
-    private LocalDate oprYmd; // 운행일자 (yyyymmdd)
+    private String ctpvNm; // 시도코드 명
 
-    @Column
-    private BusGameCtpvCode ctpvCd; // 시도 코드 <-- Enum 해야겠는데?(수기 작성)
+    @Column(nullable = false)
+    private String ctpvCd; // 시도 코드
 
     @Column
     private String sggNm; // 시군구명
     @Column
-    private Long sggCd; // 시군구 코드 <-- API로 모아오기
+    private String sggCd; // 시군구 코드
 
     @Column
-    private Long rteId;
-
-    @Column
-    private String rteNo; //노선번호
+    private String rteId; // 노선 아이디
 
     @Column
     private String rteNm; // 노선명
 
     @Column
-    private String tempPlayNm; // 임시 플레이어 이름
+    private String sttnNm; // 정류장 이름
 
     @Column
-    private Duration timeElapsed;
-
+    private String sttnSeq; // 정류장 번호
 }

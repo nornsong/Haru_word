@@ -1,15 +1,15 @@
 package com.koreanwordle.game.service;
 
-import com.koreanwordle.game.dto.BusGameBusStopIdResponse;
-import com.koreanwordle.game.dto.BusGameSggResponse;
-import com.koreanwordle.game.dto.BusGameStation;
-import com.koreanwordle.game.listener.*;
+import com.koreanwordle.game.dto.busGame.*;
 import com.koreanwordle.game.repository.BusGameRepository;
+import com.koreanwordle.game.repository.projection.CtpvInfo;
+import com.koreanwordle.game.repository.projection.RteInfo;
+import com.koreanwordle.game.repository.projection.SggInfo;
+import com.koreanwordle.game.repository.projection.SttnInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -17,133 +17,108 @@ import java.util.*;
 public class BusGameServiceImpl implements BusGameService {
 
     private final BusGameRepository busGameRepo;
-    private final BusGameListener busGameListener;
 
-    private static final LocalDate BUS_STOP_QUERY_DATE =
-            LocalDate.of(2026, 9, 18);
+    @Override
+    public ResponseEntity<BusGameCtpvResponse> getBusGameCtpv() {
+        List<CtpvInfo> ctpvInfo = busGameRepo.getAllCtpvInfo();
+        Map<String, String> ctpvInfoList = new HashMap<>();
 
-    protected PublicApiSggResponse getSgg(
-            String ctpvCd,
-            int pageNo,
-            int numOfRows
-    ) {
+        for(CtpvInfo info : ctpvInfo) {
+            ctpvInfoList.putIfAbsent(
+                    info.getCtpvCd(),
+                    info.getCtpvNm()
+            );
+        }
 
-        PublicApiSggRequest request =
-                new PublicApiSggRequest(
-                        ctpvCd,
-                        pageNo,
-                        numOfRows
-                );
-
-        return busGameListener.getSgg(request);
-    }
-
-    protected PublicApiBusStopResponse getBusStopRouteId(
-            int pageNo,
-            int numOfRows,
-            String ctpvCd,
-            String sggCd
-    ) {
-
-        PublicApiBusStopRequest request =
-                new PublicApiBusStopRequest(
-                        pageNo,
-                        numOfRows,
-                        BUS_STOP_QUERY_DATE,
-                        ctpvCd,
-                        sggCd
-                );
-
-        return busGameListener.getBusStopRouteId(request);
+        return ResponseEntity.ok(
+                new BusGameCtpvResponse(ctpvInfoList)
+        );
     }
 
     @Override
     public ResponseEntity<BusGameSggResponse> getBusGameSgg (String ctpvCd) {
-        int pageSize = 1000;
+        List<SggInfo> sggInfo = busGameRepo.getAllSggInfo(ctpvCd);
+        Map<String, String> ctpvInfoList = new HashMap<>();
+        Map<String, String> sggInfoList = new HashMap<>();
 
-        PublicApiSggResponse firstResponse = getSgg(ctpvCd, 1, 1);
-
-        int totalCount = firstResponse
-                .response()
-                .body()
-                .totalCount();
-
-        int totalPages = (totalCount + pageSize - 1) / pageSize;
-
-        Map<String, String> sggByCode = new HashMap<>();
-
-        for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
-            PublicApiSggResponse response = getSgg(ctpvCd, pageNo, 1000);
-
-            for (PublicApiSggResponse.Item item
-                    : response.response().body().items().item()) {
-
-                sggByCode.putIfAbsent(item.sggCd(), item.sggNm());
-            }
+        for(SggInfo info : sggInfo) {
+            ctpvInfoList.putIfAbsent(
+                    info.getCtpvCd(),
+                    info.getCtpvNm()
+            );
+            sggInfoList.putIfAbsent(
+                    info.getSggCd(),
+                    info.getSggNm()
+            );
         }
 
         return ResponseEntity.ok(
-                new BusGameSggResponse(sggByCode)
+                new BusGameSggResponse(ctpvInfoList, sggInfoList)
         );
     }
 
     @Override
-    public ResponseEntity<BusGameBusStopIdResponse> getBusGameBusStopRouteId(String ctpvCd, String sggCd) {
-        int pageSize = 1000;
+    public ResponseEntity<BusGameRteListResponse> getBusGameRteList(String ctpvCd, String sggCd) {
+        List<RteInfo> rteInfo = busGameRepo.getAllRteInfo(ctpvCd, sggCd);
+        Map<String, String> ctpvInfoList = new HashMap<>();
+        Map<String, String> sggInfoList = new HashMap<>();
+        Map<String, String> rteInfoList = new HashMap<>();
 
-        PublicApiBusStopResponse firstResponse = getBusStopRouteId(
-                1,
-                1,
-                ctpvCd,
-                sggCd
-        );
 
-        int totalCount = firstResponse
-                .response()
-                .body()
-                .totalCount();
-
-        int totalPages = (totalCount + pageSize - 1) / pageSize;
-
-        Map<String, String> busRouteInfo = new HashMap<>();
-        Map<String, List<BusGameStation>> stationsByRouteId = new HashMap<>();
-
-        for (int pageNo = 1; pageNo <= totalPages; pageNo++) {
-            PublicApiBusStopResponse response = getBusStopRouteId(
-                    pageNo,
-                    1000,
-                    ctpvCd,
-                    sggCd
+        for(RteInfo info : rteInfo) {
+            ctpvInfoList.putIfAbsent(
+                    info.getCtpvCd(),
+                    info.getCtpvNm()
             );
-
-            for (PublicApiBusStopResponse.Item item
-                    : response.response().body().items().item()) {
-                busRouteInfo.putIfAbsent(item.routeId(), item.routeName());
-
-                stationsByRouteId
-                        .computeIfAbsent(
-                                item.routeId(),
-                                ignored -> new ArrayList<>()
-                        )
-                        .add(
-                                new BusGameStation(
-                                        item.stationSequence(),
-                                        item.stationName()
-                                )
-                        );
-            }
+            sggInfoList.putIfAbsent(
+                    info.getSggCd(),
+                    info.getSggNm()
+            );
+            rteInfoList.putIfAbsent(
+                    info.getRteId(),
+                    info.getRteNm()
+            );
         }
 
-        stationsByRouteId.values().forEach(stations ->
-                stations.sort(
-                        Comparator.comparingInt(BusGameStation::sequence)
-                )
+        return ResponseEntity.ok(
+                new BusGameRteListResponse(ctpvInfoList, sggInfoList, rteInfoList)
         );
+    }
+
+    @Override
+    public ResponseEntity<BusGameSttnListResponse> getBusGameSttnList(String ctpvCd, String sggCd, String rteId) {
+        List<SttnInfo> rteInfo = busGameRepo.getAllSttnInfo(ctpvCd, sggCd, rteId);
+        Map<String, String> ctpvInfoList = new HashMap<>();
+        Map<String, String> sggInfoList = new HashMap<>();
+        Map<String, String> rteInfoList = new HashMap<>();
+        Map<String, String> sttnInfoList = new HashMap<>();
+
+
+        for(SttnInfo info : rteInfo) {
+            ctpvInfoList.putIfAbsent(
+                    info.getCtpvCd(),
+                    info.getCtpvNm()
+            );
+            sggInfoList.putIfAbsent(
+                    info.getSggCd(),
+                    info.getSggNm()
+            );
+            rteInfoList.putIfAbsent(
+                    info.getRteId(),
+                    info.getRteNm()
+            );
+            sttnInfoList.putIfAbsent(
+                    info.getSttnSeq(),
+                    info.getSttnNm()
+            );
+        }
 
         return ResponseEntity.ok(
-                new BusGameBusStopIdResponse(
-                        busRouteInfo,
-                        stationsByRouteId
+                new BusGameSttnListResponse(
+                        ctpvInfoList,
+                        sggInfoList,
+                        rteInfoList,
+                        sttnInfoList
                 )
         );
     }
