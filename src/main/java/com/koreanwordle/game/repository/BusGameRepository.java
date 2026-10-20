@@ -75,4 +75,14 @@ public interface BusGameRepository extends JpaRepository<BusGame, Long> {
                                   @Param("sggCd")String sggCd,
                                   @Param("rteId")String rteId
     );
+
+    @Query(""" 
+        select b
+        from BusGame b
+        where b.rteId = :rteId
+            and b.sttnSeq is not null
+        order by cast(b.sttnSeq as Long) asc, b.id asc
+    """)
+    List<BusGame> getRteInfo(@Param("rteId") String rteId);
+
 }

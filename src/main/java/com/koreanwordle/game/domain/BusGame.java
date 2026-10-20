@@ -1,8 +1,10 @@
 package com.koreanwordle.game.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class BusGame {
 
     @Id
