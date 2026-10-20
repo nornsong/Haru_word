@@ -18,11 +18,11 @@ public class BusGameRanking {
     @Column
     private Duration timeElapsed;
 
-    @Column
+    @Column(unique = true)
     private String GameSection;
 
     @Column
-    private Long routePointCount;
+    private Integer routePointCount;
 
     @Column
     private Instant startTime;
@@ -33,10 +33,23 @@ public class BusGameRanking {
     @Column
     private BusGameAccountType accountType;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bus_game_id")
+    private BusGame busGame;
+
     public void setStartTime() {
         this.startTime = Instant.now();
     }
     public void setEndTime() {
         this.endTime = Instant.now();
+    }
+
+    public static BusGameRanking startGuest(String gameSectionId, BusGame firstStation) {
+        BusGameRanking ranking = new BusGameRanking();
+        ranking.GameSection = gameSectionId;
+        ranking.accountType = BusGameAccountType.Unauthorized;
+        ranking.routePointCount = 1;
+        ranking.busGame = firstStation;
+        return ranking;
     }
 }

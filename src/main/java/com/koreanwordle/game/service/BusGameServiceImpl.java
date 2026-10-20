@@ -1,6 +1,10 @@
 package com.koreanwordle.game.service;
 
+import com.github.f4b6a3.ulid.UlidCreator;
+import com.koreanwordle.game.domain.BusGame;
+import com.koreanwordle.game.domain.BusGameRanking;
 import com.koreanwordle.game.dto.busGame.*;
+import com.koreanwordle.game.repository.BusGameRankingRepository;
 import com.koreanwordle.game.repository.BusGameRepository;
 import com.koreanwordle.game.repository.projection.CtpvInfo;
 import com.koreanwordle.game.repository.projection.RteInfo;
@@ -9,6 +13,7 @@ import com.koreanwordle.game.repository.projection.SttnInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -17,6 +22,7 @@ import java.util.*;
 public class BusGameServiceImpl implements BusGameService {
 
     private final BusGameRepository busGameRepo;
+    private final BusGameRankingRepository busGameRankingRepo;
 
     @Override
     public ResponseEntity<BusGameCtpvResponse> getBusGameCtpv() {
@@ -120,6 +126,36 @@ public class BusGameServiceImpl implements BusGameService {
                         rteInfoList,
                         sttnInfoList
                 )
+        );
+    }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BusGameGuestGameResponse> postGuestBusGameStart(String rteId) {
+
+
+        List<BusGame> busGameList = busGameRepo.getRteInfo(rteId);
+        BusGame firstStation = busGameList.getFirst();
+        String gameSectionId = UlidCreator.getUlid().toString();
+
+        BusGameRanking ranking = BusGameRanking.startGuest(gameSectionId, firstStation);
+
+        busGameRankingRepo.save(ranking);
+
+        List<BusGameGuestGameResponse.BusStationInfo> responseList =
+                busGameList.stream()
+                        .map(game ->
+                                new BusGameGuestGameResponse.BusStationInfo(
+                                        game.getRteId(),
+                                        game.getRteNm(),
+                                        game.getSttnSeq(),
+                                        game.getSttnNm()
+                                )
+                        )
+                        .toList();
+
+        return ResponseEntity.ok(
+                new BusGameGuestGameResponse(gameSectionId, responseList)
         );
     }
 }
