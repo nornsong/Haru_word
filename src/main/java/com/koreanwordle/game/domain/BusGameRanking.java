@@ -1,11 +1,13 @@
 package com.koreanwordle.game.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 
 import java.time.Duration;
 import java.time.Instant;
 
 @Entity
+@Getter
 public class BusGameRanking {
 
     @Id
@@ -19,7 +21,7 @@ public class BusGameRanking {
     private Duration timeElapsed;
 
     @Column(unique = true)
-    private String GameSection;
+    private String gameSection;
 
     @Column
     private Integer routePointCount;
@@ -43,10 +45,17 @@ public class BusGameRanking {
     public void setEndTime() {
         this.endTime = Instant.now();
     }
+    public void setTimeElapsed() {
+        this.timeElapsed = Duration.between(this.startTime, this.endTime);
+    }
+
+    public void increseRoutePoint() {
+        this.routePointCount++;
+    }
 
     public static BusGameRanking startGuest(String gameSectionId, BusGame firstStation) {
         BusGameRanking ranking = new BusGameRanking();
-        ranking.GameSection = gameSectionId;
+        ranking.gameSection = gameSectionId;
         ranking.accountType = BusGameAccountType.Unauthorized;
         ranking.routePointCount = 1;
         ranking.busGame = firstStation;

@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface BusGameRepository extends JpaRepository<BusGame, Long> {
@@ -84,5 +85,39 @@ public interface BusGameRepository extends JpaRepository<BusGame, Long> {
         order by cast(b.sttnSeq as Long) asc, b.id asc
     """)
     List<BusGame> getRteInfo(@Param("rteId") String rteId);
+
+    @Query(""" 
+      select b
+      from BusGame b
+      where b.rteId = (
+          select r.busGame.rteId
+          from BusGameRanking r
+          where r.gameSection = :gameSectionId
+      )
+      and b.sttnSeq is not null
+      and(
+        select count(s)
+        from BusGame s
+        where s.rteId = b.rteId
+        and s.sttnSeq is not null
+        and (
+            cast(s.sttnSeq as Long) < cast(b.sttnSeq as Long)
+            or(cast(s.sttnSeq as Long) = cast(b.sttnSeq as Long)
+            and s.id < b.id
+            )
+        )
+      ) = (:routePointCount - 1)
+    """)
+    Optional<BusGame> getSttnByGameSectionId(@Param("gameSectionId")String gameSectionId,
+                                             @Param("routePointCount")Integer  routePointCount
+    );
+
+    @Query(""" 
+        select count(b)
+        from BusGame b
+        where b.rteId = :rteId
+        and b.sttnSeq is not null
+    """)
+    Integer countSttnByRteId(@Param("rteId") String rteId);
 
 }

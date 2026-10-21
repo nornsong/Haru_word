@@ -158,4 +158,46 @@ public class BusGameServiceImpl implements BusGameService {
                 new BusGameGuestGameResponse(gameSectionId, responseList)
         );
     }
+
+    @Override
+    @Transactional
+    public ResponseEntity<BusGameSubmitAnswerResponse> getGuestBusGameSubmitAnswer(String submitAnswer, String gameSectionId) {
+        // 1. 입력값 검증(시작 시간 저장)
+        BusGameRanking busGameRanking = busGameRankingRepo.gameSectionId(gameSectionId);
+
+        if(busGameRanking.getStartTime() == null) {
+            busGameRanking.setStartTime();
+        }
+
+        Integer routePointCount = busGameRanking.getRoutePointCount();
+        BusGame busGameList = busGameRepo.getSttnByGameSectionId(gameSectionId, routePointCount)
+                .orElseThrow(() -> new IllegalStateException("해당 순번의 정류장이 없습니다."));
+
+        if(submitAnswer.equals(busGameList.getSttnNm())) {
+            if(busGameRanking.getRoutePointCount() < busGameRepo.countSttnByRteId(busGameList.getRteId())) {
+                busGameRanking.increseRoutePoint();
+                return ResponseEntity.ok(
+                        new BusGameSubmitAnswerResponse(
+                                BusGameAnswerResult.CORRECT
+                        )
+                );
+            }
+            else {
+                busGameRanking.setEndTime();
+                busGameRanking.setTimeElapsed();
+                return ResponseEntity.ok(
+                        new BusGameSubmitAnswerResponse(
+                                BusGameAnswerResult.COMPLETED
+                        )
+                );
+            }
+        }
+        else {
+            return ResponseEntity.ok(
+                    new BusGameSubmitAnswerResponse(
+                            BusGameAnswerResult.INCORRECT
+                    )
+            );
+        }
+    }
 }

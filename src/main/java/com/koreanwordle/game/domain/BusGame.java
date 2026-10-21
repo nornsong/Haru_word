@@ -19,6 +19,7 @@ public class BusGame {
 
     @Column
     private String sggNm; // 시군구명
+
     @Column
     private String sggCd; // 시군구 코드
 
