@@ -13,4 +13,6 @@ public interface BusGameService {
 
     ResponseEntity<BusGameSttnListResponse> getBusGameSttnList(String ctpvCd, String sggCd, String rteId);
     ResponseEntity<BusGameGuestGameResponse> postGuestBusGameStart(String rteId);
+
+    ResponseEntity<BusGameSubmitAnswerResponse> getGuestBusGameSubmitAnswer(String submitAnswer, String gameSectionId);
 }

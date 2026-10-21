@@ -43,5 +43,7 @@ public class BusGameController {
     }
 
     @GetMapping("/startGuestBusGame/submitAnswer")
-    public void postGuestBusGameSubmitAnswer(@RequestBody String submitAnswer) {}
+    public ResponseEntity<BusGameSubmitAnswerResponse> getGuestBusGameSubmitAnswer(@RequestBody BusGameSubmitAnswerRequest request) {
+        return busGameService.getGuestBusGameSubmitAnswer(request.submitAnswer(), request.gameSectionId());
+    }
 }
